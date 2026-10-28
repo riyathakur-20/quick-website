@@ -1,4 +1,10 @@
 
+"use strict";
+
+// ========================================
+// SNAPSTRIP — PHOTO BOOTH JAVASCRIPT
+// ========================================
+
 const photoInput = document.getElementById("photoInput");
 const uploadStatus = document.getElementById("uploadStatus");
 const photoFrames = document.getElementById("photoFrames");
@@ -18,37 +24,33 @@ let currentTheme = "coquette";
 let frameColor = "#fff8f2";
 let toastTimer;
 
+// Theme configurations
 const themes = {
   coquette: {
-    background: "#fff8f2",
     ink: "#57434b",
     placeholder: "#f4e5e9",
     placeholderInk: "#c28ba0",
     decoration: "♡"
   },
   korean: {
-    background: "#f7f3eb",
     ink: "#574d43",
     placeholder: "#ece6dd",
     placeholderInk: "#988878",
     decoration: "✳"
   },
   y2k: {
-    background: "#e7e2fa",
     ink: "#64558f",
     placeholder: "#e5e0f9",
     placeholderInk: "#8474bb",
     decoration: "✦"
   },
   vintage: {
-    background: "#e9d8bb",
     ink: "#6b5035",
     placeholder: "#e8d6b9",
     placeholderInk: "#947451",
     decoration: "♡"
   },
   noir: {
-    background: "#252323",
     ink: "#ffffff",
     placeholder: "#363234",
     placeholderInk: "#e2d5d8",
@@ -56,6 +58,7 @@ const themes = {
   }
 };
 
+// Photo filters
 const filters = {
   normal: "none",
   soft: "brightness(1.07) saturate(.82)",
@@ -64,32 +67,71 @@ const filters = {
   fade: "sepia(.25) saturate(.72) brightness(1.06) contrast(.84)"
 };
 
+// Check that the HTML contains the elements we need.
+const requiredElements = {
+  photoInput,
+  uploadStatus,
+  photoFrames,
+  strip,
+  captionInput,
+  previewCaption,
+  previewDate,
+  dateToggle,
+  layoutSelect,
+  filterSelect,
+  downloadButton,
+  resetButton,
+  toast
+};
+
+const missingElements = Object.entries(requiredElements)
+  .filter(([, element]) => !element)
+  .map(([name]) => name);
+
+if (missingElements.length) {
+  console.error(
+    "SnapStrip: Missing HTML elements:",
+    missingElements.join(", ")
+  );
+}
+
+// Notifications
 function showToast(message) {
+  if (!toast) return;
+
   toast.textContent = message;
   toast.classList.add("show");
 
   clearTimeout(toastTimer);
+
   toastTimer = setTimeout(() => {
     toast.classList.remove("show");
   }, 2600);
 }
 
+// Today's date
 function getToday() {
   const now = new Date();
-  return `${String(now.getMonth() + 1).padStart(2, "0")}/${String(
-    now.getDate()
-  ).padStart(2, "0")}/${String(now.getFullYear()).slice(-2)}`;
+
+  return [
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0"),
+    String(now.getFullYear()).slice(-2)
+  ].join("/");
 }
 
+// Current photos for selected layout
 function getVisiblePhotos() {
   return photos.slice(0, Number(layoutSelect.value));
 }
 
+// Theme selection
 function updateTheme() {
   strip.className = `strip theme-${currentTheme}`;
 
   document.querySelectorAll(".theme-card").forEach(button => {
     const selected = button.dataset.theme === currentTheme;
+
     button.classList.toggle("active", selected);
     button.setAttribute("aria-pressed", String(selected));
   });
@@ -97,32 +139,40 @@ function updateTheme() {
   renderPreview();
 }
 
+// Frame color
 function updateFrameColor() {
   strip.style.backgroundColor = frameColor;
 
   document.querySelectorAll(".color-dot").forEach(button => {
     const selected = button.dataset.color === frameColor;
+
     button.classList.toggle("selected", selected);
     button.setAttribute("aria-pressed", String(selected));
   });
 }
 
+// Caption
 function updateCaption() {
   previewCaption.textContent =
-    captionInput.value.trim() || "little moments, big feelings ♡";
+    captionInput.value.trim() ||
+    "little moments, big feelings ♡";
 }
 
+// Date
 function updateDate() {
   previewDate.textContent = dateToggle.checked ? getToday() : "";
 }
 
+// Update photo strip preview
 function renderPreview() {
   const visiblePhotos = getVisiblePhotos();
   const frameCount = Number(layoutSelect.value);
   const theme = themes[currentTheme];
 
   photoFrames.replaceChildren();
-  photoFrames.style.gap = currentTheme === "noir" ? "5px" : "7px";
+
+  photoFrames.style.gap =
+    currentTheme === "noir" ? "5px" : "7px";
 
   for (let i = 0; i < frameCount; i++) {
     const frame = document.createElement("div");
@@ -130,6 +180,7 @@ function renderPreview() {
 
     if (visiblePhotos[i]) {
       const img = document.createElement("img");
+
       img.src = visiblePhotos[i].url;
       img.alt = `Photo ${i + 1}`;
 
@@ -157,18 +208,19 @@ function renderPreview() {
   }
 
   strip.style.color = theme.ink;
+
   updateFrameColor();
   updateCaption();
   updateDate();
 
   uploadStatus.textContent = photos.length
-    ? `${photos.length} photo${photos.length === 1 ? "" : "s"} selected · ${
-        visiblePhotos.length
-      } shown in your strip`
+    ? `${photos.length} photo${photos.length === 1 ? "" : "s"} selected · ${visiblePhotos.length} shown in your strip`
     : "No photos selected yet.";
 }
 
-// Upload photos from your device.
+// ========================================
+// PHOTO UPLOAD — ADD WITHOUT REPLACING
+// ========================================
 
 photoInput.addEventListener("change", () => {
   const files = Array.from(photoInput.files || []);
@@ -198,61 +250,41 @@ photoInput.addEventListener("change", () => {
   }
 
   const newPhotos = filesToAdd.map(file => ({
-    file,
+    file: file,
     url: URL.createObjectURL(file)
   }));
 
+  // Append new photos instead of replacing existing ones.
   photos = [...photos, ...newPhotos];
 
+  // Allows the same file picker to be opened again.
   photoInput.value = "";
+
   renderPreview();
 
-  showToast(`${photos.length} of 4 photos added successfully! ♡`);
-});
-
-  const files = Array.from(photoInput.files || []);
-
-  if (!files.length) return;
-
-  const imageFiles = files.filter(file =>
-    file.type.startsWith("image/")
+  showToast(
+    `${photos.length} of 4 photos added successfully! ♡`
   );
-
-  if (imageFiles.length !== files.length) {
-    showToast("Some files were skipped because they aren't images.");
-  }
-
-  if (imageFiles.length > 4) {
-    showToast("Choose up to 4 photos. The first 4 will be used.");
-  }
-
-  const selectedFiles = imageFiles.slice(0, 4);
-
-  if (!selectedFiles.length) {
-    photoInput.value = "";
-    return;
-  }
-
-  photos.forEach(photo => URL.revokeObjectURL(photo.url));
-
-  photos = selectedFiles.map(file => ({
-    file,
-    url: URL.createObjectURL(file)
-  }));
-
-  renderPreview();
-  showToast("Photos added! Your strip is ready ♡");
 });
 
-// Switch between themes.
+// ========================================
+// THEME BUTTONS
+// ========================================
+
 document.querySelectorAll(".theme-card").forEach(button => {
   button.addEventListener("click", () => {
     currentTheme = button.dataset.theme;
+
+    if (!themes[currentTheme]) return;
+
     updateTheme();
   });
 });
 
-// Change the frame color.
+// ========================================
+// FRAME COLOR BUTTONS
+// ========================================
+
 document.querySelectorAll(".color-dot").forEach(button => {
   button.addEventListener("click", () => {
     frameColor = button.dataset.color;
@@ -260,12 +292,36 @@ document.querySelectorAll(".color-dot").forEach(button => {
   });
 });
 
+// ========================================
+// LIVE SETTINGS
+// ========================================
+
 layoutSelect.addEventListener("change", renderPreview);
 filterSelect.addEventListener("change", renderPreview);
 captionInput.addEventListener("input", updateCaption);
 dateToggle.addEventListener("change", updateDate);
 
-// Create a high-resolution PNG using Canvas.
+// ========================================
+// LOAD AN IMAGE
+// ========================================
+
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(
+      new Error("A photo could not be loaded.")
+    );
+
+    img.src = url;
+  });
+}
+
+// ========================================
+// CREATE DOWNLOADABLE PHOTO STRIP
+// ========================================
+
 async function createStripCanvas() {
   const selectedPhotos = getVisiblePhotos();
 
@@ -290,6 +346,7 @@ async function createStripCanvas() {
     padding;
 
   const canvas = document.createElement("canvas");
+
   canvas.width = width;
   canvas.height = height;
 
@@ -301,11 +358,13 @@ async function createStripCanvas() {
 
   const theme = themes[currentTheme];
 
+  // Background
   ctx.fillStyle = frameColor;
   ctx.fillRect(0, 0, width, height);
 
   if (currentTheme === "y2k") {
     const gradient = ctx.createLinearGradient(0, 0, width, height);
+
     gradient.addColorStop(0, "#e7e2fa");
     gradient.addColorStop(0.55, frameColor);
     gradient.addColorStop(1, "#f5d5e9");
@@ -314,18 +373,20 @@ async function createStripCanvas() {
     ctx.fillRect(0, 0, width, height);
   }
 
-  // Header.
+  // Header
   ctx.fillStyle = theme.ink;
   ctx.textBaseline = "middle";
   ctx.textAlign = "left";
   ctx.font = "bold 25px Arial";
+
   ctx.fillText("snapstrip ✳", padding, 43);
 
   ctx.textAlign = "right";
   ctx.font = "15px Arial";
+
   ctx.fillText("VOL. 001", width - padding, 43);
 
-  // Photo frames.
+  // Draw each photo
   for (let i = 0; i < count; i++) {
     const x = padding;
     const y = topHeight + i * (photoHeight + gap);
@@ -334,26 +395,15 @@ async function createStripCanvas() {
     ctx.fillRect(x, y, photoWidth, photoHeight);
 
     if (selectedPhotos[i]) {
-      const img = new Image();
-      img.src = selectedPhotos[i].url;
-
-      await new Promise((resolve, reject) => {
-        if (img.complete && img.naturalWidth) {
-          resolve();
-        } else {
-          img.onload = resolve;
-          img.onerror = () => reject(
-            new Error("A photo could not be loaded.")
-          );
-        }
-      });
+      const img = await loadImage(selectedPhotos[i].url);
 
       ctx.save();
+
       ctx.beginPath();
       ctx.rect(x, y, photoWidth, photoHeight);
       ctx.clip();
 
-      // Crop to fill the frame without stretching the photo.
+      // Cover-crop without stretching the image.
       const scale = Math.max(
         photoWidth / img.naturalWidth,
         photoHeight / img.naturalHeight
@@ -365,22 +415,43 @@ async function createStripCanvas() {
       const drawY = y + (photoHeight - drawHeight) / 2;
 
       ctx.filter = filters[filterSelect.value];
-      ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+
+      ctx.drawImage(
+        img,
+        drawX,
+        drawY,
+        drawWidth,
+        drawHeight
+      );
+
       ctx.restore();
     } else {
       ctx.fillStyle = theme.placeholderInk;
       ctx.textAlign = "center";
       ctx.font = "42px Georgia";
-      ctx.fillText(theme.decoration, width / 2, y + photoHeight / 2 - 10);
+
+      ctx.fillText(
+        theme.decoration,
+        width / 2,
+        y + photoHeight / 2 - 10
+      );
 
       ctx.font = "20px Arial";
-      ctx.fillText("your moment", width / 2, y + photoHeight / 2 + 35);
+
+      ctx.fillText(
+        "your moment",
+        width / 2,
+        y + photoHeight / 2 + 35
+      );
     }
   }
 
-  // Caption and date.
+  // Caption and date
   const footerY =
-    topHeight + count * photoHeight + (count - 1) * gap + 45;
+    topHeight +
+    count * photoHeight +
+    (count - 1) * gap +
+    45;
 
   ctx.fillStyle = theme.ink;
   ctx.textAlign = "left";
@@ -388,7 +459,8 @@ async function createStripCanvas() {
   ctx.font = "italic 25px Georgia";
 
   const caption =
-    captionInput.value.trim() || "little moments, big feelings ♡";
+    captionInput.value.trim() ||
+    "little moments, big feelings ♡";
 
   let displayCaption = caption;
 
@@ -404,16 +476,20 @@ async function createStripCanvas() {
   if (dateToggle.checked) {
     ctx.textAlign = "right";
     ctx.font = "17px Arial";
+
     ctx.fillText(getToday(), width - padding, footerY);
   }
 
   return canvas;
 }
 
-// Download the finished photo strip.
+// ========================================
+// DOWNLOAD BUTTON
+// ========================================
+
 downloadButton.addEventListener("click", async () => {
   downloadButton.disabled = true;
-  downloadButton.textContent = "Creating your strip…";
+  downloadButton.textContent = "Creating your strip...";
 
   try {
     const canvas = await createStripCanvas();
@@ -431,6 +507,7 @@ downloadButton.addEventListener("click", async () => {
 
     link.href = url;
     link.download = "snapstrip-photo-strip.png";
+
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -439,7 +516,11 @@ downloadButton.addEventListener("click", async () => {
 
     showToast("Your photo strip has been downloaded! ♡");
   } catch (error) {
-    showToast(error.message || "Something went wrong. Try again.");
+    console.error("SnapStrip download error:", error);
+
+    showToast(
+      error.message || "Something went wrong. Please try again."
+    );
   } finally {
     downloadButton.disabled = false;
     downloadButton.innerHTML =
@@ -447,9 +528,13 @@ downloadButton.addEventListener("click", async () => {
   }
 });
 
-// Reset the studio.
+// ========================================
+// RESET BUTTON
+// ========================================
+
 resetButton.addEventListener("click", () => {
   photos.forEach(photo => URL.revokeObjectURL(photo.url));
+
   photos = [];
 
   photoInput.value = "";
@@ -467,9 +552,14 @@ resetButton.addEventListener("click", () => {
   showToast("Fresh start! Make a new little memory ♡");
 });
 
-// Start the website.
+// ========================================
+// INITIALIZE WEBSITE
+// ========================================
+
 document.getElementById("year").textContent =
   new Date().getFullYear();
 
 updateTheme();
 renderPreview();
+
+console.log("SnapStrip loaded successfully!");
