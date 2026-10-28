@@ -1,1 +1,198 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#fff8f5">
+  <title>SnapStrip — Your Little Photo Studio</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="#" class="logo">snap<span>strip.</span> <span class="logo-star">✳</span></a>
+    <span class="nav-note">YOUR LITTLE PHOTO STUDIO</span>
+  </header>
+
+  <main class="page">
+    <section class="intro">
+      <span class="eyebrow">✿ A LITTLE MOMENT, FOREVER</span>
+      <h1>Make memories<br>look <em>like memories.</em></h1>
+      <p>Upload your favorite photos. Pick a vibe. Create a little
+        photo strip worth keeping.</p>
+    </section>
+
+    <section class="studio">
+      <div class="editor">
+
+        <div class="section-heading">
+          <span class="step">01</span>
+          <div>
+            <h2>Your photos</h2>
+            <p>Choose 3 or 4 pictures to begin.</p>
+          </div>
+        </div>
+
+        <label class="upload-area" for="photoInput">
+          <span class="upload-icon">↥</span>
+          <strong>Choose your photos</strong>
+          <span>JPG, PNG or WEBP · Up to 4 photos</span>
+          <span class="upload-button">Browse photos</span>
+        </label>
+        <input id="photoInput" type="file"
+          accept="image/*" multiple hidden>
+
+        <div id="uploadStatus" class="status" aria-live="polite">
+          No photos selected yet.
+        </div>
+
+        <div class="section-heading theme-heading">
+          <span class="step">02</span>
+          <div>
+            <h2>Pick your vibe</h2>
+            <p>Every mood deserves its own frame.</p>
+          </div>
+        </div>
+
+        <div class="theme-grid">
+          <button class="theme-card active" data-theme="coquette">
+            <span class="theme-art art-coquette">♡ 🎀 ♡</span>
+            <span>Coquette</span>
+          </button>
+          <button class="theme-card" data-theme="korean">
+            <span class="theme-art art-korean">film no. 04</span>
+            <span>Korean</span>
+          </button>
+          <button class="theme-card" data-theme="y2k">
+            <span class="theme-art art-y2k">✦ 2000 ✦</span>
+            <span>Y2K Flash</span>
+          </button>
+          <button class="theme-card" data-theme="vintage">
+            <span class="theme-art art-vintage">♡ memories ♡</span>
+            <span>Vintage</span>
+          </button>
+          <button class="theme-card" data-theme="noir">
+            <span class="theme-art art-noir">NO. 001</span>
+            <span>Noir</span>
+          </button>
+        </div>
+
+        <div class="section-heading settings-heading">
+          <span class="step">03</span>
+          <div>
+            <h2>Little details</h2>
+            <p>Make it yours.</p>
+          </div>
+        </div>
+
+        <label class="field-label" for="layoutSelect">Strip layout</label>
+        <select id="layoutSelect" class="field">
+          <option value="4">Classic 4-cut</option>
+          <option value="3">Mini 3-cut</option>
+        </select>
+
+        <label class="field-label" for="filterSelect">Photo filter</label>
+        <select id="filterSelect" class="field">
+          <option value="normal">Original</option>
+          <option value="soft">Soft & dreamy</option>
+          <option value="warm">Warm film</option>
+          <option value="mono">Black & white</option>
+          <option value="fade">Faded vintage</option>
+        </select>
+
+        <label class="field-label" for="captionInput">Your little caption</label>
+        <input id="captionInput" class="field"
+          type="text" maxlength="45"
+          placeholder="e.g. the good old days ♡">
+
+        <label class="check-row">
+          <input id="dateToggle" type="checkbox" checked>
+          <span>Add today's date</span>
+        </label>
+
+        <label class="field-label" for="frameColor">Frame color</label>
+        <div class="color-options">
+          <button class="color-dot selected" data-color="#fff8f2"
+            style="--swatch:#fff8f2" aria-label="Cream frame"
+            title="Cream"></button>
+          <button class="color-dot" data-color="#f6dce7"
+            style="--swatch:#f6dce7" aria-label="Pink frame"
+            title="Pink"></button>
+          <button class="color-dot" data-color="#e4e9d9"
+            style="--swatch:#e4e9d9" aria-label="Sage frame"
+            title="Sage"></button>
+          <button class="color-dot" data-color="#ffffff"
+            style="--swatch:#ffffff" aria-label="White frame"
+            title="White"></button>
+          <button class="color-dot" data-color="#252323"
+            style="--swatch:#252323" aria-label="Black frame"
+            title="Black"></button>
+        </div>
+
+        <button id="resetButton" class="reset-button" type="button">
+          ↺ Start over
+        </button>
+      </div>
+
+      <div class="preview-panel">
+        <div class="preview-top">
+          <div>
+            <span class="preview-label">YOUR CREATION</span>
+            <h2>The preview room <span>♡</span></h2>
+          </div>
+          <span class="live-pill"><span></span> LIVE</span>
+        </div>
+
+        <div class="preview-stage">
+          <div id="strip" class="strip theme-coquette">
+            <div class="strip-top">
+              <span class="strip-brand">snapstrip ✳</span>
+              <span class="strip-number">VOL. 001</span>
+            </div>
+
+            <div id="photoFrames" class="photo-frames">
+              <div class="photo-frame placeholder">
+                <span>♡</span><p>your moment</p>
+              </div>
+              <div class="photo-frame placeholder">
+                <span>✿</span><p>goes here</p>
+              </div>
+              <div class="photo-frame placeholder">
+                <span>♡</span><p>your moment</p>
+              </div>
+              <div class="photo-frame placeholder">
+                <span>✿</span><p>goes here</p>
+              </div>
+            </div>
+
+            <div class="strip-bottom">
+              <p id="previewCaption">little moments, big feelings ♡</p>
+              <span id="previewDate"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-help">
+          <span>✳</span>
+          <p>Your strip updates as you customize it.</p>
+        </div>
+
+        <button id="downloadButton" class="download-button" type="button">
+          Download my photo strip <span>↗</span>
+        </button>
+        <p class="privacy-note">♡ Your photos stay on your device.</p>
+      </div>
+    </section>
+
+    <footer>
+      <span>made with love & a little nostalgia ♡</span>
+      <span>SNAPSTRIP © <span id="year"></span></span>
+    </footer>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+</body>
+</html>
