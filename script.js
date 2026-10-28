@@ -169,7 +169,47 @@ function renderPreview() {
 }
 
 // Upload photos from your device.
+
 photoInput.addEventListener("change", () => {
+  const files = Array.from(photoInput.files || []);
+
+  if (!files.length) return;
+
+  const imageFiles = files.filter(file =>
+    file.type.startsWith("image/")
+  );
+
+  if (imageFiles.length !== files.length) {
+    showToast("Only image files can be uploaded.");
+  }
+
+  const remainingSlots = 4 - photos.length;
+
+  if (remainingSlots <= 0) {
+    showToast("You already have 4 photos. Click Start over to reset.");
+    photoInput.value = "";
+    return;
+  }
+
+  const filesToAdd = imageFiles.slice(0, remainingSlots);
+
+  if (imageFiles.length > remainingSlots) {
+    showToast(`You can add only ${remainingSlots} more photo(s).`);
+  }
+
+  const newPhotos = filesToAdd.map(file => ({
+    file,
+    url: URL.createObjectURL(file)
+  }));
+
+  photos = [...photos, ...newPhotos];
+
+  photoInput.value = "";
+  renderPreview();
+
+  showToast(`${photos.length} of 4 photos added successfully! ♡`);
+});
+
   const files = Array.from(photoInput.files || []);
 
   if (!files.length) return;
